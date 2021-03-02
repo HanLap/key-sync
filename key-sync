@@ -1,0 +1,48 @@
+#!/bin/bash
+
+
+REPO=http://coconut/shizukaze/ssh_keys.git
+
+
+
+function sync {
+  cd ~/.ssh
+
+  mkdir -p keys
+
+  if [ -d .repo ]; then
+    cd .repo
+    git pull
+  else
+    git clone $REPO .repo
+    cd .repo
+  fi
+
+  has_changes=$(git log HEAD..origin/main --oneline | cat)
+  if [ -n $has_changes ]; then
+    for key in *; do
+      name=$(basename -s .gpg -a $key)
+      echo $name
+      gpg -d --yes -o "../keys/$name" $key 
+    done
+  fi
+}
+
+
+function add {
+  key=$(readlink -f $1)
+  name=$(basename -a $key)
+
+  echo $name
+
+  cd ~/.ssh/.repo
+
+  gpg -c -o "$name.gpg" $key
+
+  git add "$name.gpg"
+  git commit -m "added $name.gpg"
+  git push
+}
+
+
+$@
