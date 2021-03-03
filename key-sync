@@ -17,6 +17,8 @@ function sync {
     if [ -n "$has_changes" ]; then
       git pull
       _decrypt_keys
+    else
+      echo "key store up to date"
     fi
   else
     git clone $REPO .repo
