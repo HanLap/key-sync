@@ -14,7 +14,7 @@ function sync {
     cd .repo
     git remote update
     has_changes=$(git log HEAD..origin/main --oneline | cat)
-    if [ -n "$has_changes" ]; then
+    if [ -n "$has_changes" ] || [ "$1" == "-f" ]; then
       git pull
       _decrypt_keys
     else
