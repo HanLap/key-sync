@@ -12,20 +12,26 @@ function sync {
 
   if [ -d .repo ]; then
     cd .repo
-    git pull
+    git remote update
+    has_changes=$(git log HEAD..origin/main --oneline | cat)
+    if [ -n $has_changes ]; then
+      git pull
+      _decrypt_keys
+    fi
   else
     git clone $REPO .repo
     cd .repo
+    _decrypt_keys
   fi
+}
 
-  has_changes=$(git log HEAD..origin/main --oneline | cat)
-  if [ -n $has_changes ]; then
-    for key in *; do
-      name=$(basename -s .gpg -a $key)
-      echo $name
-      gpg -d --yes -o "../keys/$name" $key 
-    done
-  fi
+
+function _decrypt_keys {
+  for key in *; do
+    name=$(basename -s .gpg -a $key)
+    echo $name
+    gpg -d --yes -o "../keys/$name" $key 
+  done
 }
 
 
